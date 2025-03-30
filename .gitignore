@@ -45,6 +45,13 @@ jspm_packages/
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
+# Ensure these are ignored
+node_modules
+node_modules/
+/node_modules
+/node_modules/
+**/node_modules/
+
 # TypeScript cache
 *.tsbuildinfo
 
@@ -126,6 +133,20 @@ dynamodb/
 server_dev.log
 server_direct.log
 client_dev.log
+
+# Client build files
+/client/build
+/client/dist
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Compiled output directory
 dist/
