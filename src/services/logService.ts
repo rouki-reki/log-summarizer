@@ -43,10 +43,17 @@ async function checkAndSummarize(level: number): Promise<void> {
     db.addNode(newSummaryNode);
     console.log(`Created Summary Node ${newSummaryNode.id} (Level ${newSummaryNode.level}) summarizing ${childIds.length} Level ${level} nodes.`);
 
+    // Broadcast the new summary node
+    require('./websocketService').websocketService.broadcastNodeUpdate(newSummaryNode);
 
-    // Update the parentId of the summarized nodes
+
+    // Update the parentId of the summarized nodes and get the updated nodes
     db.setParentIdForNodes(childIds, newSummaryNode.id);
+    const updatedChildNodes = childIds.map(id => db.getNodeById(id)).filter(node => node !== undefined) as Node[];
     console.log(`Updated parentId for nodes: ${childIds.join(', ')}`);
+
+    // Broadcast the updated child nodes (their parentId changed)
+    require('./websocketService').websocketService.broadcastNodeUpdate(updatedChildNodes);
 
 
     // Recursively check if this new summary node triggers further summarization
@@ -72,6 +79,9 @@ export const logService = {
     // Add the new log node to the DB
     db.addNode(newLogNode);
     console.log(`Added Log Node ${newLogNode.id}: "${logContent}"`);
+
+    // Broadcast the new log node
+    require('./websocketService').websocketService.broadcastNodeUpdate(newLogNode);
 
 
     // Check if summarization is needed starting from level 0
