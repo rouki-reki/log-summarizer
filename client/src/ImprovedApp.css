@@ -1,0 +1,186 @@
+.improved-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.app-header h1 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-indicator.connected {
+  background-color: #4caf50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.status-indicator.disconnected {
+  background-color: #f44336;
+  box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+}
+
+.controls-panel {
+  padding: 15px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.log-input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.log-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.log-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.add-button {
+  padding: 10px 20px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+
+.add-button:disabled {
+  background-color: #bbdefb;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #f44336;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.flow-container {
+  flex: 1;
+  position: relative;
+  background-color: #fafafa;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.legend-panel {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border-radius: 3px;
+}
+
+/* Custom scrollbar for node content */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
