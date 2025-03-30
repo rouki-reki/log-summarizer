@@ -105,25 +105,21 @@ const nodeTypes: NodeTypes = {
 };
 
 // Function to convert our AppNode to React Flow Node
-const nodeToFlowNode = (node: AppNode, allNodes: Map<string, AppNode>): FlowNode => {
+// Add level0OrderMap parameter to get the vertical order for log nodes
+const nodeToFlowNode = (
+    node: AppNode, 
+    allNodes: Map<string, AppNode>, 
+    level0OrderMap: Map<string, number> // Map<nodeId, orderIndex>
+): FlowNode => {
   const isSummary = node.type === 'summary';
-  
-  // Calculate position based on level and a more organized layout
-  // For logs, position them in columns based on their creation order
-  // For summaries, position them to the right of their children
-  
-  // Get timestamp for ordering
   const timestamp = new Date(node.timestamp).getTime();
+  const nodeHeight = 150; // Estimated height of a node + spacing
   
-  // Basic positioning logic - can be improved
   let xPosition = node.level * 350; // Horizontal spacing based on level
-  
-  // For y-position, use timestamp but with some grouping
-  // This helps to visually organize nodes of the same level
   let yPosition = 0;
   
   if (isSummary) {
-    // For summary nodes, try to position them at the average y-position of their children
+    // For summary nodes, position them at the average y-position of their children
     const summaryNode = node as SummaryNode;
     if (summaryNode.childIds && summaryNode.childIds.length > 0) {
       let totalY = 0;
@@ -132,39 +128,42 @@ const nodeToFlowNode = (node: AppNode, allNodes: Map<string, AppNode>): FlowNode
       summaryNode.childIds.forEach(childId => {
         const childNode = allNodes.get(childId);
         if (childNode) {
-          // Get the child's position (this is recursive but should be fine with our data structure)
-          const childFlowNode = nodeToFlowNode(childNode, allNodes);
+          // Recursively get child position, passing the order map
+          const childFlowNode = nodeToFlowNode(childNode, allNodes, level0OrderMap); 
           totalY += childFlowNode.position.y;
           count++;
         }
       });
       
-      if (count > 0) {
-        yPosition = totalY / count;
-      } else {
-        yPosition = timestamp % 1000; // Fallback
-      }
+      yPosition = (count > 0) ? totalY / count : timestamp % 1000; // Use average or fallback
     } else {
-      yPosition = timestamp % 1000; // Fallback
+      yPosition = timestamp % 1000; // Fallback if no children (shouldn't happen for summaries)
     }
   } else {
-    // For log nodes, spread them vertically based on timestamp
-    yPosition = timestamp % 1000;
+    // For log nodes (level 0), use the pre-calculated order index
+    const orderIndex = level0OrderMap.get(node.id);
+    if (orderIndex !== undefined) {
+      yPosition = orderIndex * nodeHeight; // Position vertically based on order
+    } else {
+       yPosition = timestamp % 1000; // Fallback if order not found (shouldn't happen)
+    }
   }
   
   return {
     id: node.id,
     position: { x: xPosition, y: yPosition },
     data: { 
-      label: `${isSummary ? 'Summary L' + node.level : 'Log'}: ${node.content}`,
+      label: `${isSummary ? 'Summary L' + node.level : 'Log'}: ${node.content}`, // Keep original label data if needed
       nodeType: node.type,
       level: node.level,
       timestamp: node.timestamp,
       content: node.content
     },
-    type: 'customNode',
+    type: 'customNode', // Use the custom node component
     sourcePosition: Position.Right,
     targetPosition: Position.Left,
+    // Prevent dragging for individual nodes (alternative to ReactFlow prop)
+    // draggable: false, 
   };
 };
 
@@ -216,8 +215,20 @@ function ImprovedApp() {
   // Function to update flow nodes and edges based on allNodesRef
   const updateFlow = useCallback(() => {
     const nodesMap = allNodesRef.current;
+    
+    // Calculate order for level 0 nodes based on timestamp
+    const level0Nodes = Array.from(nodesMap.values())
+      .filter(node => node.level === 0)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      
+    const level0OrderMap = new Map<string, number>();
+    level0Nodes.forEach((node, index) => {
+      level0OrderMap.set(node.id, index);
+    });
+
+    // Generate Flow nodes using the order map
     const flowNodes = Array.from(nodesMap.values()).map(node => 
-      nodeToFlowNode(node, nodesMap)
+      nodeToFlowNode(node, nodesMap, level0OrderMap) // Pass the map here
     );
     const flowEdges = createEdges(nodesMap);
     
@@ -355,6 +366,12 @@ function ImprovedApp() {
             fitView
             attributionPosition="bottom-left"
             connectionLineType={ConnectionLineType.SmoothStep}
+            nodesDraggable={false} // Disable node dragging
+            nodesConnectable={false} // Disable connecting nodes manually
+            selectNodesOnDrag={false} // Prevent selection rectangle
+            panOnDrag={true} // Allow panning by dragging background
+            zoomOnScroll={true}
+            zoomOnDoubleClick={true}
           >
             <Controls />
             <MiniMap 
